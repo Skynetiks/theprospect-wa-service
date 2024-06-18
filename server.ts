@@ -142,8 +142,8 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
 });
 
 // Read the SSL/TLS certificate and key
-const key = fs.readFileSync(path.resolve(__dirname, 'server.key'), 'utf8');
-const cert = fs.readFileSync(path.resolve(__dirname, 'server.cert'), 'utf8');
+const key = fs.readFileSync(path.resolve(__dirname, '../server.key'), 'utf8');
+const cert = fs.readFileSync(path.resolve(__dirname, '../server.cert'), 'utf8');
 const credentials = { key, cert };
 
 // Create an HTTPS server with the Express app and the credentials
