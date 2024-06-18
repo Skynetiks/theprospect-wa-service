@@ -23,7 +23,7 @@ const pool = new Pool({
 
 app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const body = req.body;
-  console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
+//   console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
 
   const id = body.entry?.[0].id;
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
@@ -141,14 +141,12 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
   }
 });
 
-// Read the SSL/TLS certificate and key
-const key = fs.readFileSync(path.resolve(__dirname, '../server.key'), 'utf8');
-const cert = fs.readFileSync(path.resolve(__dirname, '../server.cert'), 'utf8');
-const credentials = { key, cert };
+app.get("/verify", (req: any, res: any) => {
+    res.sendStatus({
+        message: "Working"
+    });
+})
 
-// Create an HTTPS server with the Express app and the credentials
-const httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
