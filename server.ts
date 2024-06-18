@@ -3,11 +3,14 @@ import axios from "axios";
 import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
 import { query } from "./db";
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 const { WEBHOOK_VERIFY_TOKEN } = process.env;
 
@@ -138,6 +141,14 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
   }
 });
 
-app.listen(PORT, () => {
+// Read the SSL/TLS certificate and key
+const key = fs.readFileSync(path.resolve(__dirname, 'server.key'), 'utf8');
+const cert = fs.readFileSync(path.resolve(__dirname, 'server.cert'), 'utf8');
+const credentials = { key, cert };
+
+// Create an HTTPS server with the Express app and the credentials
+const httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
