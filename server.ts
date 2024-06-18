@@ -3,14 +3,14 @@ import axios from "axios";
 import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
 import { query } from "./db";
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
+import cors from "cors"
 
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+app.use(cors());
 
 const { WEBHOOK_VERIFY_TOKEN } = process.env;
 
