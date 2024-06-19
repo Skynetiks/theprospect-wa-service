@@ -4,11 +4,14 @@ import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
 import { query } from "./db";
 import cors from "cors"
+import fs, { readFileSync } from "fs"
+
+const file = readFileSync("./97F5065B163D05A354B9AA8128001576.txt")
 
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
@@ -145,6 +148,10 @@ app.get("/verify", (req: any, res: any) => {
     res.sendStatus({
         message: "Working"
     });
+})
+
+app.get('/.well-known/pki-validation/97F5065B163D05A354B9AA8128001576.txt', (req, res) => {
+  res.sendFile('/home/ubuntu/theprospect-wa-service/97F5065B163D05A354B9AA8128001576.txt')
 })
 
 app.listen(PORT, () => {
