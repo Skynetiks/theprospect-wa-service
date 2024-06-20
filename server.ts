@@ -1,4 +1,4 @@
-import express from "express";
+const express = require('express')
 import axios from "axios";
 import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
@@ -8,7 +8,7 @@ import { query } from "./db";
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // app.use(cors());
 
@@ -144,7 +144,7 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
   }
 });
 
-app.get("/", (res: any) => {
+app.get("/", (req:any, res: any) => {
   res.sendStatus(200);
 });
 
