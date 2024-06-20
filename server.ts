@@ -3,14 +3,14 @@ import axios from "axios";
 import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
 import { query } from "./db";
-import cors from "cors";
+// import cors from "cors";
 
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// app.use(cors());
 
 const { WEBHOOK_VERIFY_TOKEN } = process.env;
 
@@ -144,10 +144,8 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
   }
 });
 
-app.get("/verify", (req: any, res: any) => {
-  res.send({
-    message: "Working",
-  });
+app.get("/", (res: any) => {
+  res.sendStatus(200);
 });
 
 app.listen(PORT, () => {
