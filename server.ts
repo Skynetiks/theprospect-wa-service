@@ -3,10 +3,7 @@ import axios from "axios";
 import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
 import { query } from "./db";
-import cors from "cors"
-import fs, { readFileSync } from "fs"
-
-const file = readFileSync("./97F5065B163D05A354B9AA8128001576.txt")
+import cors from "cors";
 
 require("dotenv").config();
 
@@ -26,7 +23,7 @@ const pool = new Pool({
 
 app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const body = req.body;
-//   console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
+  //   console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
 
   const id = body.entry?.[0].id;
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
@@ -118,7 +115,10 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
       console.error("Error sending message:", error);
       res.sendStatus(500);
     }
-  } else if (status?.conversation.origin.type === "marketing" || status?.conversation.origin.type === "service") {
+  } else if (
+    status?.conversation.origin.type === "marketing" ||
+    status?.conversation.origin.type === "service"
+  ) {
     if (status.status === "delivered") {
       await query(
         'UPDATE "WhatsAppMessage" SET "isDelivered" = true WHERE "wamId" = $1;',
@@ -145,14 +145,10 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
 });
 
 app.get("/verify", (req: any, res: any) => {
-    res.sendStatus({
-        message: "Working"
-    });
-})
-
-app.get('/.well-known/pki-validation/97F5065B163D05A354B9AA8128001576.txt', (req, res) => {
-  res.sendFile('/home/ubuntu/theprospect-wa-service/97F5065B163D05A354B9AA8128001576.txt')
-})
+  res.sendStatus({
+    message: "Working",
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
