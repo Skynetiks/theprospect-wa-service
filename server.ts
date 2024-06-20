@@ -145,7 +145,7 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
 });
 
 app.get("/verify", (req: any, res: any) => {
-  res.sendStatus({
+  res.send({
     message: "Working",
   });
 });
