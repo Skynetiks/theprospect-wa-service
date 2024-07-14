@@ -8,7 +8,7 @@ import { query } from "./db";
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 // app.use(cors());
 
@@ -23,7 +23,7 @@ const pool = new Pool({
 
 app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const body = req.body;
-    console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
+  console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
 
   const id = body.entry?.[0].id;
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
