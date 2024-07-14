@@ -32,7 +32,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
   if (status.status === "failed"){
     await query(
       'UPDATE "WhatsAppMessage" SET "errorMessage" = $1 WHERE "wamId" = $2;',
-      [status.errors.message + " - " + status.errors[0].error_data.details,status.id.toString()]
+      [status.errors[0].message + " - " + status.errors[0].error_data.details,status.id.toString()]
     );
     return res.sendStatus(200);
   }
