@@ -29,6 +29,14 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   const status = body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0];
 
+  if (status.status === "failed"){
+    await query(
+      'UPDATE "WhatsAppMessage" SET "errorMessage" = $1 WHERE "wamId" = $2;',
+      [status.errors.message + " - " + status.errors[0].error_data.details,status.id.toString()]
+    );
+    return res.sendStatus(200);
+  }
+
   if (message?.type != null) {
     const business_phone_number_id =
       body.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
@@ -44,6 +52,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
 
       if (!whatsAppPhone) {
         console.error("WhatsApp phone not found for " + phoneNumberId);
+        return res.sendStatus(500);
       }
 
       const whatsAppAccountResult = await query(
@@ -56,6 +65,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         console.error(
           "Organization not found for " + whatsAppPhone.organizationId
         );
+        return res.sendStatus(500);
       }
 
       const organizationResult = await query(
@@ -68,6 +78,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         console.error(
           "Organization not found for " + whatsAppPhone.organizationId
         );
+        return res.sendStatus(500);
       }
 
       const leadResult = await query(
@@ -78,6 +89,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
 
       if (!lead) {
         console.error("Lead not found");
+        return res.sendStatus(500);
       }
 
       if(message?.type === "text"){
@@ -132,10 +144,10 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         },
       });
 
-      res.sendStatus(200);
+      return res.sendStatus(200);
     } catch (error) {
       console.error("Error sending message:", error);
-      res.sendStatus(500);
+      return res.sendStatus(500);
     }
   } else if (
     status?.conversation.origin.type === "marketing" ||
@@ -147,9 +159,9 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         [status.id.toString()]
       );
     }
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } else {
-    res.sendStatus(200);
+    return res.sendStatus(200);
   }
 });
 
