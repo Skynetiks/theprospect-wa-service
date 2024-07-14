@@ -8,7 +8,7 @@ import { query } from "./db";
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // app.use(cors());
 
@@ -23,13 +23,13 @@ const pool = new Pool({
 
 app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const body = req.body;
-  //   console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
+    console.log("Incoming webhook message:", JSON.stringify(body, null, 2));
 
   const id = body.entry?.[0].id;
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   const status = body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0];
 
-  if (message?.type === "text") {
+  if (message?.type != null) {
     const business_phone_number_id =
       body.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
 
@@ -80,21 +80,43 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         console.error("Lead not found");
       }
 
-      await query(
-        'INSERT INTO "WhatsAppMessage" (id, "wamId", "leadId", "sender_phone_number", "sender_phone_number_id", "reciever_phone_number_id", "message", "messageType", "isSentMessage", "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);',
-        [
-          makeId(20),
-          message.id,
-          lead.id,
-          message.from,
-          business_phone_number_id,
-          id,
-          message.text.body,
-          message.type,
-          false,
-          unixToDateTime(message.timestamp),
-        ]
-      );
+      if(message?.type === "text"){
+        await query(
+          'INSERT INTO "WhatsAppMessage" (id, "wamId", "leadId", "sender_phone_number", "sender_phone_number_id", "reciever_phone_number_id", "message", "messageType", "isSentMessage", "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);',
+          [
+            makeId(20),
+            message.id,
+            lead.id,
+            message.from,
+            business_phone_number_id,
+            id,
+            message.text.body,
+            message.type,
+            false,
+            unixToDateTime(message.timestamp),
+          ]
+        );
+      } else if(message?.type === "button"){
+        await query(
+          'INSERT INTO "WhatsAppMessage" (id, "wamId", "leadId", "sender_phone_number", "sender_phone_number_id", "reciever_phone_number_id", "message", "messageType", "isSentMessage", "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);',
+          [
+            makeId(20),
+            message.id,
+            lead.id,
+            message.from,
+            business_phone_number_id,
+            id,
+            message.button.text,
+            message.type,
+            false,
+            unixToDateTime(message.timestamp),
+          ]
+        );
+        await query(
+          'UPDATE "Lead" SET "isSubscribedToWA"= false WHERE "id" = $1;',
+          [lead.id]
+        )
+      }
 
       // Mark incoming message as read
       await axios({
