@@ -29,7 +29,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   const status = body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0];
 
-  if (status.status === "failed"){
+  if (status?.status === "failed"){
     await query(
       'UPDATE "WhatsAppMessage" SET "errorMessage" = $1 WHERE "wamId" = $2;',
       [status.errors[0].message + " - " + status.errors[0].error_data.details,status.id.toString()]
@@ -83,7 +83,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
 
       const leadResult = await query(
         'SELECT * FROM "Lead" WHERE "phone" = $1 AND "organizationId" = $2;',
-        [message.from, organization.id]
+        [`+${message.from}`, organization.id]
       );
       const lead = leadResult.rows[0];
 
