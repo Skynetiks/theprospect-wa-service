@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require("express");
 import axios from "axios";
 import { Pool } from "pg";
 import { findAllValuesByKey, makeId, unixToDateTime } from "./utils";
@@ -29,10 +29,13 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   const status = body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0];
 
-  if (status?.status === "failed"){
+  if (status?.status === "failed") {
     await query(
       'UPDATE "WhatsAppMessage" SET "errorMessage" = $1 WHERE "wamId" = $2;',
-      [status.errors[0].message + " - " + status.errors[0].error_data.details,status.id.toString()]
+      [
+        status.errors[0].message + " - " + status.errors[0].error_data.details,
+        status.id.toString(),
+      ]
     );
     return res.sendStatus(200);
   }
@@ -92,7 +95,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         return res.sendStatus(500);
       }
 
-      if(message?.type === "text"){
+      if (message?.type === "text") {
         await query(
           'INSERT INTO "WhatsAppMessage" (id, "wamId", "leadId", "sender_phone_number", "sender_phone_number_id", "reciever_phone_number_id", "message", "messageType", "isSentMessage", "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);',
           [
@@ -108,7 +111,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
             unixToDateTime(message.timestamp),
           ]
         );
-      } else if(message?.type === "button"){
+      } else if (message?.type === "button") {
         await query(
           'INSERT INTO "WhatsAppMessage" (id, "wamId", "leadId", "sender_phone_number", "sender_phone_number_id", "reciever_phone_number_id", "message", "messageType", "isSentMessage", "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);',
           [
@@ -127,7 +130,7 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
         await query(
           'UPDATE "Lead" SET "isSubscribedToWA"= false WHERE "id" = $1;',
           [lead.id]
-        )
+        );
       }
 
       // Mark incoming message as read
@@ -149,18 +152,19 @@ app.post("/whatsapp-webhook", async (req: any, res: any) => {
       console.error("Error sending message:", error);
       return res.sendStatus(500);
     }
-  } else if (
-    status?.conversation.origin.type === "marketing" ||
-    status?.conversation.origin.type === "service"
-  ) {
+  } else {
     if (status.status === "delivered") {
       await query(
         'UPDATE "WhatsAppMessage" SET "isDelivered" = true WHERE "wamId" = $1;',
         [status.id.toString()]
       );
     }
-    return res.sendStatus(200);
-  } else {
+    if (status.status === "read") {
+      await query(
+        'UPDATE "WhatsAppMessage" SET "isRead" = true WHERE "wamId" = $1;',
+        [status.id.toString()]
+      );
+    }
     return res.sendStatus(200);
   }
 });
@@ -178,7 +182,7 @@ app.get("/whatsapp-webhook", (req: any, res: any) => {
   }
 });
 
-app.get("/", (req:any, res: any) => {
+app.get("/", (req: any, res: any) => {
   res.sendStatus(200);
 });
 
